@@ -44,7 +44,7 @@ export default function StockCard({ holding, onRemove, onEdit, viewMode = 'detai
             mounted = false;
             clearInterval(interval);
         };
-    }, [symbol, viewMode, onQuoteUpdate]);
+    }, [symbol, onQuoteUpdate]);
 
     const handleRemove = (e) => {
         e.stopPropagation();
