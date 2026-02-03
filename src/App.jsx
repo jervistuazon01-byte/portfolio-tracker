@@ -31,7 +31,6 @@ function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
   const [hideTicker, setHideTicker] = useState(false);
   const saveTimeoutRef = useRef(null);
-  const latestPortfolioRef = useRef(portfolio);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -39,14 +38,11 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    latestPortfolioRef.current = portfolio;
-
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
     saveTimeoutRef.current = setTimeout(() => {
       localStorage.setItem('stock_portfolio_v2', JSON.stringify(portfolio));
-      saveTimeoutRef.current = null;
     }, 300);
 
     return () => {
