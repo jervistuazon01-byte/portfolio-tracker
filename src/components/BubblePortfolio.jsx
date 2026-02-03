@@ -1,22 +1,33 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import StockBubble from './StockBubble';
 import './Portfolio.css';
 
 export default function BubblePortfolio({ stocks, onQuoteUpdate, onRemove, hideTicker }) {
     const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight - 80 });
     const [draggedBubble, setDraggedBubble] = useState(null); // { symbol, x, y }
-    const [bubblesData, setBubblesData] = useState([]); // Store bubble data for collision calculation
+    const bubblesDataRef = useRef([]); // Store bubble data for collision calculation
+    const resizeFrameRef = useRef(null);
 
     useEffect(() => {
         const updateDim = () => {
-            setDimensions({
-                width: window.innerWidth,
-                height: window.innerHeight - 80
+            if (resizeFrameRef.current) {
+                cancelAnimationFrame(resizeFrameRef.current);
+            }
+            resizeFrameRef.current = requestAnimationFrame(() => {
+                setDimensions({
+                    width: window.innerWidth,
+                    height: window.innerHeight - 80
+                });
             });
         };
 
         window.addEventListener('resize', updateDim);
-        return () => window.removeEventListener('resize', updateDim);
+        return () => {
+            window.removeEventListener('resize', updateDim);
+            if (resizeFrameRef.current) {
+                cancelAnimationFrame(resizeFrameRef.current);
+            }
+        };
     }, []);
 
     const bubbles = useMemo(() => {
@@ -160,7 +171,7 @@ export default function BubblePortfolio({ stocks, onQuoteUpdate, onRemove, hideT
 
     // Update bubbles data when bubbles change (safe effect instead of ref during render)
     useEffect(() => {
-        setBubblesData(bubbles);
+        bubblesDataRef.current = bubbles;
     }, [bubbles]);
 
     // Handle drag updates from child bubbles
@@ -184,7 +195,7 @@ export default function BubblePortfolio({ stocks, onQuoteUpdate, onRemove, hideT
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         // Find the dragged bubble's radius
-        const draggedBubbleData = bubblesData.find(b => b.symbol === draggedBubble.symbol);
+        const draggedBubbleData = bubblesDataRef.current.find(b => b.symbol === draggedBubble.symbol);
         const draggedRadius = draggedBubbleData ? draggedBubbleData.r : 50;
 
         const minDistance = bubble.r + draggedRadius;
@@ -206,7 +217,7 @@ export default function BubblePortfolio({ stocks, onQuoteUpdate, onRemove, hideT
         }
 
         return { x: 0, y: 0 };
-    }, [draggedBubble, bubblesData]);
+    }, [draggedBubble]);
 
     return (
         <div
