@@ -8,23 +8,43 @@ export default function SearchBar({ onAdd }) {
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const wrapperRef = useRef(null);
+    const requestIdRef = useRef(0);
+    const cacheRef = useRef(new Map());
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(async () => {
             if (query.length > 1) {
+                const normalizedQuery = query.trim().toUpperCase();
+                const requestId = ++requestIdRef.current;
+
+                if (cacheRef.current.has(normalizedQuery)) {
+                    setResults(cacheRef.current.get(normalizedQuery));
+                    setLoading(false);
+                    return;
+                }
+
                 setLoading(true);
                 try {
                     const data = await searchStocks(query);
                     // Filter to only common stock types to avoid noise
                     const filtered = data.filter(item => !item.symbol.includes('.'));
-                    setResults(filtered.slice(0, 5));
+                    const slicedResults = filtered.slice(0, 5);
+                    cacheRef.current.set(normalizedQuery, slicedResults);
+                    if (requestIdRef.current === requestId) {
+                        setResults(slicedResults);
+                    }
                 } catch (e) {
-                    console.error(e);
+                    if (requestIdRef.current === requestId) {
+                        console.error(e);
+                    }
                 } finally {
-                    setLoading(false);
+                    if (requestIdRef.current === requestId) {
+                        setLoading(false);
+                    }
                 }
             } else {
                 setResults([]);
+                setLoading(false);
             }
         }, 500);
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import SearchBar from './components/SearchBar';
 import Portfolio from './components/Portfolio';
 import ApiKeyInput from './components/ApiKeyInput';
@@ -30,6 +30,7 @@ function App() {
   const [syncModalOpen, setSyncModalOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
   const [hideTicker, setHideTicker] = useState(false);
+  const saveTimeoutRef = useRef(null);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -37,7 +38,18 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    localStorage.setItem('stock_portfolio_v2', JSON.stringify(portfolio));
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      localStorage.setItem('stock_portfolio_v2', JSON.stringify(portfolio));
+    }, 300);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, [portfolio]);
 
   useEffect(() => {
