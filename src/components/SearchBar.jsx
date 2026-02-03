@@ -25,7 +25,7 @@ export default function SearchBar({ onAdd }) {
 
                 setLoading(true);
                 try {
-                    const data = await searchStocks(query);
+                    const data = await searchStocks(trimmedQuery);
                     // Filter to only common stock types to avoid noise
                     const filtered = data.filter(item => !item.symbol.includes('.'));
                     const slicedResults = filtered.slice(0, 5);
