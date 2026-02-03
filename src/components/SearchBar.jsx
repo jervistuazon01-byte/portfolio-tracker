@@ -10,7 +10,6 @@ export default function SearchBar({ onAdd }) {
     const wrapperRef = useRef(null);
     const requestIdRef = useRef(0);
     const cacheRef = useRef(new Map());
-    const cacheLimit = 20;
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(async () => {
@@ -31,10 +30,6 @@ export default function SearchBar({ onAdd }) {
                     const filtered = data.filter(item => !item.symbol.includes('.'));
                     const slicedResults = filtered.slice(0, 5);
                     cacheRef.current.set(normalizedQuery, slicedResults);
-                    if (cacheRef.current.size > cacheLimit) {
-                        const oldestKey = cacheRef.current.keys().next().value;
-                        cacheRef.current.delete(oldestKey);
-                    }
                     if (requestIdRef.current === requestId) {
                         setResults(slicedResults);
                     }
