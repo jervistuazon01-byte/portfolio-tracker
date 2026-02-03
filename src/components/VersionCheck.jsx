@@ -5,6 +5,7 @@ import '../styles/VersionCheck.css'; // We'll create this CSS file
 const VersionCheck = () => {
     const [hasUpdate, setHasUpdate] = useState(false);
     const [currentVersion, setCurrentVersion] = useState(null);
+    const [isVisible, setIsVisible] = useState(!document.hidden);
 
     useEffect(() => {
         // 1. Get the initial version when the app loads
@@ -24,6 +25,20 @@ const VersionCheck = () => {
     }, []);
 
     useEffect(() => {
+        const handleVisibilityChange = () => {
+            setIsVisible(!document.hidden);
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!isVisible) return;
+
         // 2. Poll for updates every minute
         const interval = setInterval(async () => {
             if (!currentVersion) return; // Don't check if we don't have a base version
@@ -43,7 +58,7 @@ const VersionCheck = () => {
         }, 60000); // Check every 60 seconds
 
         return () => clearInterval(interval);
-    }, [currentVersion]);
+    }, [currentVersion, isVisible]);
 
     const handleUpdate = () => {
         // Force reload ignoring cache
