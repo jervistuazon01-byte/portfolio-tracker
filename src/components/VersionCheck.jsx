@@ -10,7 +10,7 @@ const VersionCheck = () => {
         // 1. Get the initial version when the app loads
         const checkInitialVersion = async () => {
             try {
-                const response = await fetch('/portfolio-tracker/version.json?t=' + new Date().getTime());
+                const response = await fetch(`${import.meta.env.BASE_URL}version.json?t=${new Date().getTime()}`);
                 if (response.ok) {
                     const data = await response.json();
                     setCurrentVersion(data.version);
@@ -29,7 +29,7 @@ const VersionCheck = () => {
             if (!currentVersion) return; // Don't check if we don't have a base version
 
             try {
-                const response = await fetch('/portfolio-tracker/version.json?t=' + new Date().getTime());
+                const response = await fetch(`${import.meta.env.BASE_URL}version.json?t=${new Date().getTime()}`);
                 if (response.ok) {
                     const data = await response.json();
                     // If the fetched version is DIFFERENT from our initial version, an update is available
