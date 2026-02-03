@@ -53,6 +53,15 @@ function App() {
   }, [portfolio]);
 
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.setItem('stock_portfolio_v2', JSON.stringify(latestPortfolioRef.current));
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem('portfolio_view_mode', viewMode);
   }, [viewMode]);
 
